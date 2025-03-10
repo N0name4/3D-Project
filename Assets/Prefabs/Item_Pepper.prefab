@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5297304642176308425}
   - component: {fileID: 5721328460927097885}
   - component: {fileID: 4732191492646807224}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Item_Pepper
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -107,7 +107,7 @@ GameObject:
   - component: {fileID: 5801461041530950829}
   - component: {fileID: 496018153766866098}
   - component: {fileID: 5106783760317143439}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Pepper
   m_TagString: Untagged
   m_Icon: {fileID: 0}

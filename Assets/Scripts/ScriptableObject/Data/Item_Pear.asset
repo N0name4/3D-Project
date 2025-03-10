@@ -15,6 +15,11 @@ MonoBehaviour:
   displayName: "\uBC30"
   description: "\uBA39\uC73C\uBA74 \uB354\uBE14 \uC810\uD504 \uAC00\uB2A5"
   type: 1
+  icon: {fileID: 21300000, guid: d4b87fa4adc3b064189e130e9f3cd6ab, type: 3}
   dropPrefab: {fileID: 3299961721680394559, guid: 191bb5c797b1f314bbb9cca8e4510cda, type: 3}
   canStack: 1
   maxStackAmount: 5
+  consumables:
+  - type: 4
+    value: 2
+    duration: 1

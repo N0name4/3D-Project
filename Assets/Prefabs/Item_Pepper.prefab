@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4499319847466338612}
   - component: {fileID: 5297304642176308425}
   - component: {fileID: 5721328460927097885}
+  - component: {fileID: 4732191492646807224}
   m_Layer: 0
   m_Name: Item_Pepper
   m_TagString: Untagged
@@ -82,6 +83,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &4732191492646807224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5135001697586445476}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d67d67c0b466604992fd2744ae368b1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  data: {fileID: 11400000, guid: 4ccdd8ab292e86142811d389bf90a688, type: 2}
 --- !u!1 &5423581650878803835
 GameObject:
   m_ObjectHideFlags: 0

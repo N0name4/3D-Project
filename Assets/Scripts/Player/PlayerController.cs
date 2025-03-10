@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,9 +7,17 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed;
+    public float defaultSpeed;
+    public float speedBoostMultiplier = 2f;
+    private bool isSpeedBoosted = false;
     private Vector2 curMovementInput;
+
+    private int defaultMaxJumps;
+    public int maxJumps;
+    private bool isJumpBoosted = false;
     public float jumpPower;
     public LayerMask groundLayerMask;
+
 
     [Header("Look")]
     public Transform cameraContainer;
@@ -22,6 +31,16 @@ public class PlayerController : MonoBehaviour
     [HideInInspector]
     public bool canLook = true;
 
+    public Action inventory;
+
+    private void LateUpdate()
+    {
+        if (canLook)
+        {
+            CameraLook();
+        }
+    }
+
     private Rigidbody _rigidbody;
 
     private void Awake()
@@ -31,20 +50,14 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        defaultSpeed = moveSpeed;
+        defaultMaxJumps = maxJumps;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void FixedUpdate()
     {
         Move();
-    }
-
-    private void LateUpdate()
-    {
-        if (canLook)
-        {
-            CameraLook();
-        }
     }
 
     public void OnLookInput(InputAction.CallbackContext context)
@@ -116,4 +129,52 @@ public class PlayerController : MonoBehaviour
         Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
         canLook = !toggle;
     }
+
+    public void OnInventoryButton(InputAction.CallbackContext callbackContext)
+    {
+        if (callbackContext.phase == InputActionPhase.Started)
+        {
+            inventory?.Invoke();
+            ToggleCursor();
+        }
+    }
+
+    void ToggleCursor()
+    {
+        bool toggle = Cursor.lockState == CursorLockMode.Locked;
+        Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
+        canLook = !toggle;
+    }
+    public void BoostSpeed(float duration, float multiplier)
+    {
+        if (isSpeedBoosted) return;
+
+        isSpeedBoosted = true;
+        moveSpeed *= multiplier; 
+        StartCoroutine(ResetSpeed(duration));
+    }
+
+    public void BoostJump(float duration, int extraJumps)
+    {
+        if (isJumpBoosted) return;
+
+        isJumpBoosted = true;
+        maxJumps += extraJumps;
+        StartCoroutine(ResetJump(duration, extraJumps));
+    }
+
+    IEnumerator ResetSpeed(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        moveSpeed = defaultSpeed; // 원래 속도로 복구
+        isSpeedBoosted = false;
+    }
+
+    IEnumerator ResetJump(float duration, int extraJumps)
+    {
+        yield return new WaitForSeconds(duration);
+        maxJumps -= extraJumps; // 추가된 점프 횟수 제거
+        isJumpBoosted = false;
+    }
+
 }

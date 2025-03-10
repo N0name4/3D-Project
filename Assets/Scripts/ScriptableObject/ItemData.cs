@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum ItemType
 {
@@ -12,14 +13,17 @@ public enum ConsumableType
 {
     Health,
     Hunger,
-    Stamina
+    Stamina,
+    Speed,
+    Jump
 }
 
-[SerializeField]
+[System.Serializable]
 public class ItemDataConsumable
 {
     public ConsumableType type;
     public float value;
+    public float duration;
 
 }
 
@@ -30,6 +34,7 @@ public class ItemData : ScriptableObject
     public string displayName;
     public string description;
     public ItemType type;
+    public Sprite icon;
     public GameObject dropPrefab;
 
     [Header("Stacking")]

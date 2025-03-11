@@ -12,11 +12,16 @@ public class PlayerController : MonoBehaviour
     private bool isSpeedBoosted = false;
     private Vector2 curMovementInput;
 
-    private int defaultMaxJumps;
+    public int currentjumps = 0;
     public int maxJumps;
     private bool isJumpBoosted = false;
     public float jumpPower;
     public LayerMask groundLayerMask;
+
+    public float staminaDrain = 10f; 
+    public float staminaRecovery = 5f;
+    private bool isWallClimbing = false;
+    private bool isWallHanging = false;
 
 
     [Header("Look")]
@@ -32,6 +37,7 @@ public class PlayerController : MonoBehaviour
     public bool canLook = true;
 
     public Action inventory;
+    private Rigidbody _rigidbody;
 
     private void LateUpdate()
     {
@@ -41,7 +47,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private Rigidbody _rigidbody;
 
     private void Awake()
     {
@@ -51,9 +56,9 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         defaultSpeed = moveSpeed;
-        defaultMaxJumps = maxJumps;
         Cursor.lockState = CursorLockMode.Locked;
     }
+
 
     private void FixedUpdate()
     {
@@ -70,18 +75,60 @@ public class PlayerController : MonoBehaviour
         if (context.phase == InputActionPhase.Performed)
         {
             curMovementInput = context.ReadValue<Vector2>();
+            bool isWall = IsTouchingWall();
+
+            if(isWall)
+            {
+                if(curMovementInput.y > 0 && CharacterManager.Instance.Player.condition.stamina.curVal > 0)
+                {
+                    StartWallClimb();
+                }
+                else if(curMovementInput == Vector2.zero && CharacterManager.Instance.Player.condition.stamina.curVal > 0)
+                {
+                    StartWallHang();
+                }
+                else if (curMovementInput.y < 0 || CharacterManager.Instance.Player.condition.stamina.curVal <= 0) 
+                {
+                    StopWallClimb();
+                }
+            }
+            else
+            {
+                Vector3 dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
+                dir *= moveSpeed;
+                dir.y = _rigidbody.velocity.y;
+                _rigidbody.velocity = dir;
+            }
         }
         else if (context.phase == InputActionPhase.Canceled)
         {
             curMovementInput = Vector2.zero;
+            if (IsTouchingWall())
+            {
+                isWallClimbing = false;
+                isWallHanging = true;
+                _rigidbody.useGravity = false;
+                _rigidbody.velocity = Vector3.zero;
+            }
+            else
+            {
+                isWallHanging = false;
+                _rigidbody.velocity = new Vector3(0, _rigidbody.velocity.y, 0);
+            }
         }
     }
 
     public void OnJumpInput(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Started && IsGrounded())
+        IsGrounded();
+        if (context.phase == InputActionPhase.Started && currentjumps < maxJumps)
         {
+            currentjumps++;
             GetComponent<Rigidbody>().AddForce(Vector2.up * jumpPower, ForceMode.Impulse);
+        }
+        else if (isWallClimbing || isWallHanging)
+        {
+            StopWallClimb();
         }
     }
 
@@ -117,6 +164,7 @@ public class PlayerController : MonoBehaviour
         {
             if (Physics.Raycast(rays[i], 0.1f, groundLayerMask))
             {
+                currentjumps = 0;
                 return true;
             }
         }
@@ -176,5 +224,49 @@ public class PlayerController : MonoBehaviour
         maxJumps -= extraJumps; // 추가된 점프 횟수 제거
         isJumpBoosted = false;
     }
+
+
+    private bool IsTouchingWall()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 1f))
+        {
+            return hit.collider.CompareTag("Wall"); // "Wall" 태그가 붙은 오브젝트만 감지
+        }
+        return false;
+    }
+
+
+    private void StartWallClimb()
+    {
+        if (!isWallClimbing)
+        {
+            isWallClimbing = true;
+            isWallHanging = false;
+            _rigidbody.useGravity = false;
+        }
+
+        _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, 10f, _rigidbody.velocity.z);
+        CharacterManager.Instance.Player.condition.stamina.Subtract(staminaDrain * Time.deltaTime);
+    }
+
+    private void StartWallHang()
+    {
+        if (!isWallHanging)
+        {
+            isWallHanging = true;
+            isWallClimbing = false;
+            _rigidbody.useGravity = false;
+            _rigidbody.velocity = Vector3.zero;
+        }
+    }
+
+    private void StopWallClimb()
+    {
+        isWallClimbing = false;
+        isWallHanging = false;
+        _rigidbody.useGravity = true;
+    }
+
 
 }
